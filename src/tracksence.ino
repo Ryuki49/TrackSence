@@ -1,0 +1,70 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+#define SENSOR_A 12
+#define SENSOR_B 5
+
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+int contador = 0;
+
+
+
+void setup() {
+
+  Serial.begin(115200);
+  pinMode(SENSOR_A, INPUT);
+  pinMode(SENSOR_B, INPUT);
+
+  lcd.init();
+  lcd.backlight();
+}
+
+//HIGH  = detectou pessoa
+//LOW = não detectou
+
+void loop() {
+
+  int estadoA = digitalRead(SENSOR_A);
+  int estadoB = digitalRead(SENSOR_B);
+
+  //int estadoA = HIGH;
+  //int estadoB = LOW;
+
+  // pessoa entrando
+  if (estadoA == HIGH) {
+
+    delay(200);
+
+    if (digitalRead(SENSOR_B) == HIGH) {
+
+      contador++;
+
+      Serial.print("Entrou... QTD Atual: ");
+      Serial.println(contador);
+      lcd.print(contador);
+
+      while(digitalRead(SENSOR_A)==HIGH || digitalRead(SENSOR_B)==HIGH);
+    }
+  }
+
+  // pessoa saindo
+  if (estadoB == HIGH) {
+
+    delay(200);
+
+    if (digitalRead(SENSOR_A) == HIGH) {
+
+      contador--;
+
+      if(contador < 0) contador = 0;
+
+      Serial.print("Saiu... QTD ATUAL: ");
+      Serial.println(contador);
+
+      while(digitalRead(SENSOR_A)==HIGH || digitalRead(SENSOR_B)==HIGH);
+    }
+  }
+
+}
